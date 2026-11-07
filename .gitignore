@@ -1,0 +1,15 @@
+.DS_Store
+*.tmp
+*.swp
+.claude/settings.local.json
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# wago.tools DB2 snapshots are large and reproducible; commit only the diffs
+data/wago/*/
+!data/wago/diffs/
+
+# personal profile, never committed
+CLAUDE.local.md

@@ -1,0 +1,70 @@
+# Spell names the wago diff highlights first (one per line, case-insensitive).
+# Everything else is still diffed, but listed after these. Edit freely.
+
+# Shaman — Restoration core
+Riptide
+Chain Heal
+Healing Wave
+Lesser Healing Wave
+Earth Shield
+Water Shield
+Mana Tide Totem
+Nature's Swiftness
+Healing Way
+Ancestral Healing
+Tidal Focus
+Tidal Mastery
+Purification
+Mana Spring Totem
+Healing Stream Totem
+Tremor Totem
+Earthbind Totem
+Windfury Totem
+Grace of Air Totem
+Strength of Earth Totem
+Totemic Focus
+Restorative Totems
+Improved Reincarnation
+Ancestral Knowledge
+Mindfulness
+Natural Grace
+
+# Shaman — other
+Lava Burst
+Lightning Bolt
+Chain Lightning
+Earth Shock
+Flame Shock
+Frost Shock
+Elemental Mastery
+Ghost Wolf
+Reincarnation
+
+# Racials (Horde)
+Blood Fury
+Shatter Curse
+Axe Specialization
+Hardiness
+Berserking
+Regeneration
+Da Voodoo Shuffle
+Beast Slaying
+War Stomp
+Endurance
+Cultivation
+Nature Resistance
+Will of the Forsaken
+Cannibalize
+Underwater Breathing
+Shadow Resistance
+
+# Racials (Skyborne)
+Windshaper
+High Order
+
+# Legacy / systems
+Well Rested
+Thrill of Adventure
+Frequent Flier
+Gourmand
+Camping

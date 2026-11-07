@@ -1,0 +1,11 @@
+{
+  "_comment": "Staff posts that scripts/coverage_check.py may skip, each with the reason it was judged not to need a citation in a knowledge file. Add a post here only after reading it in full. Remove the entry if a later refresh writes values from it. A key ending in '/' is a topic prefix and covers every post in that topic.",
+  "https://us.forums.blizzard.com/en/wow/t/wow-forever-beta-known-issues-september-18/2352687/1": "Beta known-issues list (17 Sept 2026); bugs, not values. Beta closed 23 Oct.",
+  "https://us.forums.blizzard.com/en/wow/t/create-the-hero-you-want-to-be-in-world-of-warcraft-forever/2358033/1": "Marketing article naming races; no racial numbers. racials.md is datamined.",
+  "https://us.forums.blizzard.com/en/wow/t/world-of-warcraft-forever-class-deep-dives-%E2%80%94-priest-and-warrior/2367485/": "Class deep dive (30 Sept 2026) describing beta changes later superseded by the dated Beta Development Notes; recorded as such in the 27 Oct CHANGELOG entry.",
+  "https://us.forums.blizzard.com/en/wow/t/world-of-warcraft-forever-class-deep-dives-%E2%80%94-hunter-and-druid/2367361/": "Class deep dive (30 Sept 2026); superseded by the dated Beta Development Notes (27 Oct CHANGELOG).",
+  "https://us.forums.blizzard.com/en/wow/t/world-of-warcraft-forever-class-deep-dives-%E2%80%94-mage-and-shaman/2375389/": "Class deep dive (7 Oct 2026); superseded by the dated Beta Development Notes (27 Oct CHANGELOG).",
+  "https://us.forums.blizzard.com/en/wow/t/world-of-warcraft-forever-class-deep-dives-%E2%80%94-rogue-and-warlock/2375390/": "Class deep dive (7 Oct 2026); superseded by the dated Beta Development Notes (27 Oct CHANGELOG).",
+  "https://us.forums.blizzard.com/en/wow/t/world-of-warcraft-forever-class-deep-dives-%E2%80%94-paladin/2383403/": "Class deep dive (15 Oct 2026); superseded by the dated Beta Development Notes (27 Oct CHANGELOG).",
+  "https://us.forums.blizzard.com/en/wow/t/wow-forever-hotfixes-november-6-2026/2403040/4": "Same hotfix list as post 1 of this topic (6 Nov), re-posted 7 Nov with the 5 Nov section added; cited everywhere as [T1 blizz-forum 2026-11-06]."
+}

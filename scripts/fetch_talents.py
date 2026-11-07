@@ -1,0 +1,174 @@
+#!/usr/bin/env python3
+"""
+fetch_talents.py — Re-pull WoW Forever talent data from classicwowforever.com.
+
+The site's talent calculator ships all nine classes in one Next.js chunk named
+forever-talents-<hash>.js. This script:
+  1. Loads a calculator page, finds the current chunk URL (hash changes per deploy)
+  2. Downloads the chunk and parses every talent node
+  3. Writes data/talents.json
+  4. Regenerates knowledge/talents-<class>.md
+  5. Prints a diff summary vs the previous talents.json (if present)
+
+Usage:
+  python scripts/fetch_talents.py            # fetch + write
+  python scripts/fetch_talents.py --dry-run  # fetch + diff only, no writes
+  python scripts/fetch_talents.py --chunk path/to/local.js  # parse a saved chunk
+
+Requires: requests (pip install requests)
+"""
+import argparse, json, re, sys, datetime, pathlib
+
+try:
+    import requests
+except ImportError:
+    requests = None
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+DATA = ROOT / "data" / "talents.json"
+KNOW = ROOT / "knowledge"
+SITE = "https://classicwowforever.com"
+CLASSES = ["warrior", "hunter", "mage", "rogue", "priest", "warlock", "paladin", "druid", "shaman"]
+UA = {"User-Agent": "wow-forever-agent/1.0 (guild research tool; github.com/Durkadigger/wow-forever-agent)"}
+
+
+def find_chunk_url():
+    html = requests.get(f"{SITE}/talents/shaman/", headers=UA, timeout=30).text
+    m = re.search(r"(/_next/static/chunks/forever-talents-[A-Za-z0-9_-]+\.js)", html)
+    if m:
+        return SITE + m.group(1)
+    # Fallback: scan every chunk referenced on the page for the talent payload
+    for path in set(re.findall(r"(/_next/static/chunks/[A-Za-z0-9_./-]+\.js)", html)):
+        txt = requests.get(SITE + path, headers=UA, timeout=30).text
+        if "Convection" in txt and "Riptide" in txt:
+            return SITE + path
+    raise SystemExit("Could not locate the talent chunk; site structure may have changed.")
+
+
+def parse_chunk(t: str):
+    """Tolerant parser: node objects start with {id:`...`,name:`...` and contain maxRanks."""
+    # Tree headers: {id:`class-tree`,name:`Tree Name`... (key order varies)
+    trees = []
+    for m in re.finditer(r"\{id:`((?:%s)-[a-z-]+)`,name:`([^`]+)`" % "|".join(CLASSES), t):
+        look = t[m.start(): m.start() + 2500]
+        if "nodes:[" in look and "maxRanks" not in look.split("nodes:[")[0]:
+            trees.append({"id": m.group(1), "name": m.group(2), "pos": m.start()})
+    # Node starts
+    starts = []
+    for m in re.finditer(r"\{id:`([a-z0-9-]+)`,name:`([^`]+)`", t):
+        look = t[m.start(): m.start() + 400]
+        if re.search(r"maxRanks:\d+", look):
+            starts.append((m.start(), m.group(1), m.group(2)))
+    nodes = []
+    for k, (idx, nid, name) in enumerate(starts):
+        end = starts[k + 1][0] if k + 1 < len(starts) else min(len(t), idx + 4000)
+        seg = t[idx:end]
+        def g(rx, default=None):
+            mm = re.search(rx, seg, re.S)
+            return mm.group(1) if mm else default
+        ranks_raw = g(r"ranks:\[((?:`[^`]*`,?)*)\]", "")
+        ranks = re.findall(r"`([^`]*)`", ranks_raw)
+        tree = [tr for tr in trees if tr["pos"] < idx]
+        tree = tree[-1] if tree else None
+        if not tree or not nid.startswith(tree["id"].split("-")[0]):
+            # warlock nodes use bare ids (e.g. `improved-imp`); trust position instead
+            pass
+        nodes.append({
+            "id": nid, "name": name,
+            "row": int(g(r"row:(\d+)", 0)), "col": int(g(r"col:(\d+)", 0)),
+            "maxRanks": int(g(r"maxRanks:(\d+)", 0)),
+            "ranks": ranks,
+            "requires": (g(r"requires:\[([^\]]*)\]", "") or "").replace("`", ""),
+            "requiredPoints": g(r"requiredPoints:(\d+)"),
+            "evidence": g(r"evidenceImage:`([^`]+)`"),
+            "treeId": tree["id"] if tree else "?",
+            "tree": tree["name"] if tree else "?",
+        })
+    # Drop header pseudo-nodes (class/tree objects that matched by accident)
+    nodes = [n for n in nodes if n["maxRanks"] > 0]
+    return {"fetched": datetime.date.today().isoformat(), "trees": trees, "nodes": nodes}
+
+
+OVERRIDES_DEFAULT = ["<!-- overrides -->",
+                     "## Overrides (tier 1–2 values that outrank the generated lines)",
+                     "_None yet._",
+                     "<!-- /overrides -->"]
+
+
+def existing_overrides(path):
+    """Keep the hand-maintained tier 1–2 overrides block across regenerations (see docs/sop-provenance.md)."""
+    if path.exists():
+        m = re.search(r"<!-- overrides -->.*?<!-- /overrides -->", path.read_text(encoding="utf-8"), re.S)
+        if m:
+            return m.group(0).split("\n")
+    return OVERRIDES_DEFAULT
+
+
+def render_md(cls, data, build_label="beta"):
+    trees = [tr for tr in data["trees"] if tr["id"].startswith(cls + "-")]
+    out = [f"# WoW Forever — {cls.title()} Talents",
+           f"Data as of: {data['fetched']} b:{build_label} (auto-generated by scripts/fetch_talents.py)",
+           "Source: classicwowforever.com talent calculator chunk. Rank-1 captured tooltips; higher ranks are the site's estimates. Values change with each build.",
+           f"Provenance: [T3 cwf {data['fetched']} b:{build_label}] applies to every talent line below unless an Overrides entry says otherwise. "
+           "The tag date is the date this script fetched the site; the site's own capture may be earlier. "
+           "Provenance tags: `[T<tier> <source-id> <date> b:<build>]`, see docs/sop-provenance.md and sources.md. Build labels in data/builds.json.",
+           "", *existing_overrides(KNOW / f"talents-{cls}.md"), ""]
+    for tr in trees:
+        ns = sorted([n for n in data["nodes"] if n["treeId"] == tr["id"]], key=lambda n: (n["row"], n["col"]))
+        out.append(f"## {tr['name']} ({len(ns)} talents)")
+        cur = None
+        for n in ns:
+            if n["row"] != cur:
+                cur = n["row"]; out.append(f"\n**R{cur + 1}**")
+            r1 = (n["ranks"][0] if n["ranks"] else "(no tooltip captured)")
+            r1 = re.sub(r"\s*\n\s*", " | ", r1.strip())
+            req = f" *(requires {n['requires']})*" if n["requires"] else ""
+            out.append(f"- {n['name']} [{n['maxRanks']}]{req} — {r1}")
+        out.append("")
+    return "\n".join(out)
+
+
+def diff(old, new):
+    o = {n["id"]: n for n in old.get("nodes", [])}
+    n = {x["id"]: x for x in new["nodes"]}
+    added = [n[k]["name"] for k in n if k not in o]
+    removed = [o[k]["name"] for k in o if k not in n]
+    changed = [n[k]["name"] for k in n if k in o and (o[k]["ranks"] != n[k]["ranks"] or o[k]["maxRanks"] != n[k]["maxRanks"] or o[k]["row"] != n[k]["row"])]
+    return added, removed, changed
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--chunk", help="parse a local chunk file instead of fetching")
+    ap.add_argument("--build", default="beta", help="build label for the provenance tag, e.g. blizzcon-demo or 1.16.0.70112 (register it in data/builds.json)")
+    a = ap.parse_args()
+    if a.chunk:
+        text = pathlib.Path(a.chunk).read_text(encoding="utf-8")
+        src = a.chunk
+    else:
+        if requests is None:
+            raise SystemExit("pip install requests")
+        src = find_chunk_url()
+        text = requests.get(src, headers=UA, timeout=60).text
+    data = parse_chunk(text)
+    data["source"] = src
+    print(f"Parsed {len(data['nodes'])} talents across {len(data['trees'])} trees from {src}")
+    old = json.loads(DATA.read_text(encoding="utf-8")) if DATA.exists() else {}
+    added, removed, changed = diff(old, data)
+    print(f"Added {len(added)}: {added[:15]}")
+    print(f"Removed {len(removed)}: {removed[:15]}")
+    print(f"Changed {len(changed)}: {changed[:30]}")
+    if a.dry_run:
+        return
+    DATA.parent.mkdir(exist_ok=True)
+    DATA.write_text(json.dumps(data, indent=1, ensure_ascii=False), encoding="utf-8")
+    for cls in CLASSES:
+        (KNOW / f"talents-{cls}.md").write_text(render_md(cls, data, a.build), encoding="utf-8")
+    with open(ROOT / "CHANGELOG.md", "a", encoding="utf-8") as f:
+        f.write(f"\n## {data['fetched']} — talents refresh\n- Source: [T3 cwf {data['fetched']} b:{a.build}] {src}\n- Added: {', '.join(added) or 'none'}\n- Removed: {', '.join(removed) or 'none'}\n- Changed: {', '.join(changed) or 'none'}\n")
+    print("Wrote data/talents.json, knowledge/talents-*.md, CHANGELOG.md")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,108 @@
+{
+  "_doc": "Registry of every client build the knowledge base has data from. See docs/sop-provenance.md section 4. wago_product is the wago.tools product slug for WoW Forever; confirmed 2026-09-16 (see wago_product_note).",
+  "wago_product": "wowf",
+  "wago_product_candidates": [
+    {
+      "product": "wow_classic_titan",
+      "version_seen": "3.80.2.69815",
+      "created_at": "2026-09-12",
+      "note": "Appeared BlizzCon day but has 30 historical builds, so it is a long-running product, not a new one. Probe 2026-09-15: no Skyborne race, no Shatter Curse, no Well Rested → verdict 'probably NOT Forever'. Re-run --list-products after the beta client ships 17 Sept 2026 and look for a NEW product slug. RESOLVED 2026-09-16: not Forever; Forever is wow_classic_beta 1.60.x."
+    }
+  ],
+  "builds": [
+    {
+      "label": "blizzcon-demo",
+      "product": null,
+      "version": null,
+      "date": "2026-09-12",
+      "note": "BlizzCon 2026 floor demo. Rank-1 tooltips captured by classicwowforever.com (13 Sept) and Warcraft Tavern hands-on (12 Sept). Not a public client.",
+      "sources": [
+        "cwf",
+        "wtavern-handson",
+        "vod-blizzcon",
+        "blizz-deepdive"
+      ]
+    },
+    {
+      "label": "wago-1.60.1.69893",
+      "product": "wow_classic_beta",
+      "version": "1.60.1.69893",
+      "date": "2026-09-16",
+      "note": "Snapshot via scripts/wago_diff.py",
+      "sources": [
+        "wago"
+      ]
+    },
+    {
+      "label": "wago-1.60.1.69913",
+      "product": "wow_classic_beta",
+      "version": "1.60.1.69913",
+      "date": "2026-09-18",
+      "note": "Snapshot via scripts/wago_diff.py",
+      "sources": [
+        "wago"
+      ]
+    },
+    {
+      "label": "wago-1.60.1.70009",
+      "product": "wow_classic_beta",
+      "version": "1.60.1.70009",
+      "date": "2026-09-24",
+      "note": "Snapshot via scripts/wago_diff.py",
+      "sources": [
+        "wago"
+      ]
+    },
+    {
+      "label": "wago-1.60.1.70532",
+      "product": "wow_classic_beta",
+      "version": "1.60.1.70532",
+      "date": "2026-10-21",
+      "note": "Last Forever build on wow_classic_beta (also listed under wowf, created 2026-10-21 16:45 UTC). Snapshot via scripts/wago_diff.py; copy kept under data/wago/wowf/ as the diff baseline.",
+      "sources": [
+        "wago"
+      ]
+    },
+    {
+      "label": "beta",
+      "product": null,
+      "version": null,
+      "date": "2026-10-27",
+      "note": "classicwowforever.com talent calculator chunk as fetched 2026-10-27 by scripts/fetch_talents.py (default label). The site does not state a build; its content matches the mid-October (about 16 Oct) beta tuning. Tier 3 only; never overrides the wago Overrides blocks.",
+      "sources": [
+        "cwf"
+      ]
+    },
+    {
+      "label": "wago-1.60.1.70634",
+      "product": "wowf",
+      "version": "1.60.1.70634",
+      "date": "2026-10-27",
+      "note": "Newest Forever build, product wowf (created 2026-10-27 15:26 UTC; 70630 came 2026-10-27 01:44 UTC and was not snapshotted). Snapshot via scripts/wago_diff.py. Does NOT contain the 26-27 Oct racial changes.",
+      "sources": [
+        "wago"
+      ]
+    },
+    {
+      "label": "wago-1.60.1.70790",
+      "product": "wowf",
+      "version": "1.60.1.70790",
+      "date": "2026-11-04",
+      "note": "Snapshot via scripts/wago_diff.py",
+      "sources": [
+        "wago"
+      ]
+    },
+    {
+      "label": "wago-1.60.1.70862",
+      "product": "wowf",
+      "version": "1.60.1.70862",
+      "date": "2026-11-07",
+      "note": "Snapshot via scripts/wago_diff.py",
+      "sources": [
+        "wago"
+      ]
+    }
+  ],
+  "wago_product_note": "Confirmed 2026-09-16 by probe of build 1.60.1.69893: Skyborne races (High Order, Windshaper), Shatter Curse, Well Rested, Bountiful Harvest all present. Blizzard REUSED the old Mists Classic beta slug (114 builds of 5.5.0.x from 2025) rather than creating a new product; Forever builds are the 1.60.x line. Battle.net install arg: --game=wow_classic_beta. UPDATE 2026-10-27: wago now lists a new product slug `wowf` (4 builds: 1.60.1.70245 on 13 Oct, 70532 on 21 Oct, 70630 and 70634 on 27 Oct; the product exists since 13 Oct). Probe of 70634: Skyborne race, Shatter Curse, Well Rested, Plainsrunning, Bountiful Harvest all present -> verdict 'looks like Forever'. The beta closed 23 Oct 10:00 PDT, so `wowf` is the live/launch product; `wow_classic_beta` last build 1.60.1.70532. `wow_cn_beta` (1.60.1.70450 on 19 Oct) is the China beta line, not snapshotted. Snapshots 70009 and 70532 were copied under data/wago/wowf/ so one product folder holds the diff baseline."
+}

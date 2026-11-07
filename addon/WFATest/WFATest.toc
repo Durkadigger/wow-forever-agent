@@ -1,0 +1,8 @@
+## Interface: 16001, 16000
+## Title: WFA Test (wow-forever-agent)
+## Notes: Read-only snapshot and session-log tool. Saves stats, buffs, talents, gear, spellbook and tooltips to SavedVariables so they can be checked against datamined values. Never automates anything and never works around secret values.
+## Author: Plague guild (github.com/Durkadigger/wow-forever-agent)
+## Version: 0.3.0
+## SavedVariables: WFATestDB
+
+WFATest.lua
